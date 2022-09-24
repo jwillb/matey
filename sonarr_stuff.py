@@ -14,7 +14,6 @@ def lookup(search):
     print(f"Found: {title} ({year})")
     tvdb_id = result["tvdbId"]
     tvrage_id = result["tvRageId"]
-    #profile_id = result["profileId"]
     title_slug = result["titleSlug"]
     images = result["images"]
     seasons = result["seasons"]
@@ -31,9 +30,9 @@ def lookup(search):
             "images": images,
             "seasons": seasons,
             "path": path,
-            "profileId": 6,
+            "profileId": 4, # 6 is 720/1080, 4 is 1080
             "monitored": True,
-            "qualityProfileId": 6,
+            "qualityProfileId": 4,
             "languageProfileId": 1,
             "tvRageId": tvrage_id,
             "tvdbId": tvdb_id,
@@ -58,13 +57,11 @@ def deleteShow(search):
 
 def addShow(search):
     info = lookup(search)
-    print(str(info))
     print(requests.post(f"{base_string}/series" + key_string_2, data=json.dumps(info)).json())
 
 
-#series = requests.get(f"{base_string}/series" + key_string_2).json()[1]
-#print(series)
+series = requests.get(f"{base_string}/series" + key_string_2).json()[0]
+print(series)
 #listSeries()
-#lookup("Mad Men")
 
-addShow("tvdb:368207")
+addShow(input("Show to add: "))
