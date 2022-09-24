@@ -1,26 +1,53 @@
 from urllib.parse import quote
 import requests, json
 
-api_key = ""
-base_string = "http://localhost:8989/api/v3"
+api_key = "5471ca175deb4424a552743adc4b7300"
+base_string = "http://192.168.1.101:8989/api/v3"
 key_string = f"&apikey={api_key}"
+key_string_2 = f"?apikey={api_key}"
 
 def lookup(search):
     query = quote(search)
-    result = requests.get(f"{base_string}/series/lookup?term={query}" + key_string).json()
-    title = ""
-    if title != "":
-        print(f"Found: {title} ({network})")
+    result = requests.get(f"{base_string}/series/lookup?term={query}" + key_string).json()[0]
+    title = result["title"]
+    year = result["year"]
+    print(f"Found: {title} ({year})")
+    tvdb_id = result["tvdbId"]
+    tvrage_id = result["tvRageId"]
+    #profile_id = result["profileId"]
+    title_slug = result["titleSlug"]
+    images = result["images"]
+    seasons = result["seasons"]
+    for i in range(len(seasons)):
+        seasons[i]["monitored"] = True
+    path = f"/tv/{title}"
+    opts = {
+        "ignoreEpisodesWithFiles": False,
+        "ignoreEpisodesWithoutFiles": False,
+        "searchForMissingEpisodes": True
+    }
+    json_data = {
+            "title": title,
+            "images": images,
+            "seasons": seasons,
+            "path": path,
+            "profileId": 6,
+            "monitored": True,
+            "qualityProfileId": 6,
+            "languageProfileId": 1,
+            "tvRageId": tvrage_id,
+            "tvdbId": tvdb_id,
+            "titleSlug": title_slug,
+            "addOptions": opts
+    }
+    return json_data
+    # TODO: Make it search better (currently grabs the top result because of the programmer's laziness)
 
-    tv_id = ""
-    return tv_id
-    # TODO: Add more return info
 
 def listSeries():
-    series = requests.get(f"{base_string}/series" + key_string).json()
-    for i in range(len(series[0])):
-        print(f"{i + 1}. {series[0][i]["title"]} ({series[0][i]["network"]})")
-        print(f"\tOverview: {series[0][i]["overview"]}")
+    series = requests.get(f"{base_string}/series" + key_string_2).json()
+    for i in range(len(series)):
+        print(f"{i + 1}. {series[i]['title']} ({series[i]['network']})")
 
 def deleteShow(search):
     show_id = lookup(search)
@@ -30,4 +57,14 @@ def deleteShow(search):
     
 
 def addShow(search):
-    pass
+    info = lookup(search)
+    print(str(info))
+    print(requests.post(f"{base_string}/series" + key_string_2, data=json.dumps(info)).json())
+
+
+#series = requests.get(f"{base_string}/series" + key_string_2).json()[1]
+#print(series)
+#listSeries()
+#lookup("Mad Men")
+
+addShow("tvdb:368207")
