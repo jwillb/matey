@@ -1,19 +1,16 @@
 from urllib.parse import quote
 import requests, json
 
-s_api_key = "5471ca175deb4424a552743adc4b7300"
-s_base_string = "http://192.168.1.101:8989/api/v3"
-
 class SonarrInstance:
     def __init__(self, api_key, base_url):
         self.__api_key = api_key
         self.__base_url = base_url
     def lookup(self, term):
-        result = requests.get(f"{self.__base_url}/series/lookup?term={quote(term)}&apikey={self.__api_key}").json()
-        for i in range(5):
-            print(f"{i + 1}. {result[i]['title']}")
-        result = result[int(input("> ")) - 1]
-        print(f"Selected {result['title']} ({result['year']})")
+        result = requests.get(f"{self.__base_url}/series/lookup?term={quote(term)}&apikey={self.__api_key}").json()[0]
+        #for i in range(5):
+        #    print(f"{i + 1}. {result[i]['title']}")
+        #result = result[int(input("> ")) - 1]
+        #print(f"Selected {result['title']} ({result['year']})")
         
         title = result["title"]
         year = result["year"]
@@ -50,12 +47,14 @@ class SonarrInstance:
                 "titleSlug": title_slug,
                 "addOptions": opts
         }
-        return json.dumps(json_data)
+        return json.dumps(json_data), title, year
 
     def listSeries(self):
         series = requests.get(f"{self.__base_url}/series?apikey={self.__api_key}").json()
+        answer = ""
         for i in range(len(series)):
-            print(f"{i + 1}. {series[i]['title']} ({series[i]['network']})")
+            answer += (f"{i + 1}. {series[i]['title']} ({series[i]['network']})\n")
+        return answer
 
     def addSeries(self, show):
         code = requests.post(f"{self.__base_url}/series?apikey={self.__api_key}", data=show)
@@ -68,15 +67,17 @@ class RadarrInstance:
 
     def listMovies(self):
         result = requests.get(f"{self.__base_url}/movie?apikey={self.__api_key}").json()
+        answer = ""
         for i in range(len(result)):
-            print(f"{i + 1}. {result[i]['title']} ({result[i]['year']})")
+            answer += f"{i + 1}. {result[i]['title']} ({result[i]['year']})\n"
+        return answer
 
     def lookup(self, term):
-        result = requests.get(f"{self.__base_url}/movie/lookup?term={quote(term)}&apikey={self.__api_key}").json()
-        for i in range(len(result)):
-            print(f"{i + 1}. {result[i]['title']} ({result[i]['year']})")
-        result = result[int(input("> ")) - 1]
-        print(f"Selected {result['title']} ({result['year']})")
+        result = requests.get(f"{self.__base_url}/movie/lookup?term={quote(term)}&apikey={self.__api_key}").json()[0]
+        #for i in range(len(result)):
+        #    print(f"{i + 1}. {result[i]['title']} ({result[i]['year']})")
+        #result = result[int(input("> ")) - 1]
+        #print(f"Selected {result['title']} ({result['year']})")
 
         title = result["title"]
         year = result["year"]
@@ -99,11 +100,11 @@ class RadarrInstance:
             "addOptions": opts
         }
         #return json.dumps(json_data)
-        return json.dumps(json_data)
+        return json.dumps(json_data), title, year
 
     def addMovie(self, movie):
         headers = {"Content-type": "application/json"}
-        code = requests.post(f"{self.__base_url}/movie?apikey={self.__api_key}", data=movie, headers=headers))
+        code = requests.post(f"{self.__base_url}/movie?apikey={self.__api_key}", data=movie, headers=headers)
         return code
 
 
