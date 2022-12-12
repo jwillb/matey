@@ -27,6 +27,16 @@ async def dl_file(ctx, link, file_name):
 media = discord.SlashCommandGroup("media", "Commands to manage movies/tv")
 sonarr = media.create_subgroup("sonarr", "Search for and download TV shows")
 radarr = media.create_subgroup("radarr", "Search for and download movies")
+download = discord.SlashCommandGroup("download", "Download files")
+
+@download.command()
+async def aria2(ctx, link):
+    os.system(f"aria2c -d ./downloads {link}")
+
+@download.command()
+async def torrent(ctx, magnet):
+    await ctx.respond("Not yet implemented")
+
 
 @sonarr.command()
 async def list(ctx):
